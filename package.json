@@ -1,0 +1,20 @@
+{
+    "name": "create-sort-app",
+    "version": "0.0.1",
+    "description": "Generate each smart contract function call as a seperate react component.",
+    "main": "index.js",
+    "scripts": {
+      "test": "create-sort-app"
+    },
+    "keywords": ["etherum","smart contract","react component"],
+    "author": "Jason Zucchetto",
+    "license": "Apache",
+    "bin": {
+      "create-sort-app": "bin/index.js"
+    },
+    "dependencies": {
+      "shelljs": "^0.8.5",
+      "http": "^0.0.1-security",
+      "fs": "^0.0.1-security"
+    }
+  }
