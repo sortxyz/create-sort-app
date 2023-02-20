@@ -55,19 +55,20 @@ https.get(api, function (response) {
     }
 
     if (jsonABI) {
+      const DIR_NAME = 'sort-app';
       // console.log(jsonABI);
 
       /************** Clone boilerplate code to current directory **************/
-      shell.exec('git clone https://github.com/KhemnarMayuresh/initial-code-for-npm-package')
+      shell.exec('git clone https://github.com/sortxyz/create-sort-app-template ' + DIR_NAME);
       console.log("Cloning the boilerplate code");
 
       /************** create component folder if not exists **************/
-      if (!fs.existsSync("./initial-code-for-npm-package/src/components")) {
-        fs.mkdirSync("./initial-code-for-npm-package/src/components");
+      if (!fs.existsSync("./"+DIR_NAME+"/src/components")) {
+        fs.mkdirSync("./"+DIR_NAME+"/src/components");
       }
 
-      if (!fs.existsSync("./initial-code-for-npm-package/src/components/contracts")) {
-        fs.mkdirSync("./initial-code-for-npm-package/src/components/contracts");
+      if (!fs.existsSync("./"+DIR_NAME+"/src/components/contracts")) {
+        fs.mkdirSync("./"+DIR_NAME+"/src/components/contracts");
       }
 
       var contractDataFileContent = `
@@ -75,9 +76,11 @@ https.get(api, function (response) {
       export const CONTRACTADDRESS = "${contractAddress}";
       export const CONTRACTABI = ${JSON.stringify(jsonABI)};
               `;
-              fs.writeFileSync("./initial-code-for-npm-package/src/components/contracts/contractData.js", contractDataFileContent);
+              fs.writeFileSync("./"+DIR_NAME+"/src/components/contracts/contractData.js", contractDataFileContent);
       
       var allComponentList = [];
+      var readComponentList = [];
+      var writeComponentList = [];
       // console.log("Started creating react components for each function call");
 
       jsonABI.map((element, index) => {
@@ -101,7 +104,11 @@ https.get(api, function (response) {
             fileData = `//Creating custom component 
 import React, { useContext, useEffect, useState } from 'react';
 import { CONTRACTADDRESS, CONTRACTABI } from './contracts/contractData';
-
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
+import Button from '@mui/material/Button';
+import Typography from '@mui/material/Typography';
+import TextField from '@mui/material/TextField';
               
 const ${componentName} = (props) => {
         
@@ -144,43 +151,79 @@ const ${componentName} = (props) => {
   }
       
   return (
-    <>
-      <h4>${element.name}</h4>  
-      <form onSubmit={handleFormSubmit}>`;
-            let formInputs = "";
-            element.inputs.map((ele, ind) => {
-              // console.log(ele);
-              let id = ele.name ? ele.name : "customInput" + ind;
-              if (
-                (ele.type.startsWith("uint") || ele.type.startsWith("int")
-                ) && !(ele.type.endsWith("[]"))) {
-                formInputs += `
-        <label for="${id}">${id}: ${ele.type}</label><br/>
-        <input type="number" id="${id}" name="${id}" min="0" required/><br/>
-                        `;
-              } else { // string, addreess, tuple, tuple[]
-                formInputs += `
-        <label for="${id}">${id}: ${ele.type}</label><br/>
-        <input type="text" id="${id}" name="${id}" required/><br/>
-                        `;
-              } 
-            })
+    <Card style={{marginBottom: "20px"}} variant="outlined">
+      <CardContent>
+        <Typography variant="h6" gutterBottom>
+          ${element.name}
+        </Typography>
+        <form onSubmit={handleFormSubmit}>`;
+              let formInputs = "";
+              element.inputs.map((ele, ind) => {
+                // console.log(ele);
+                let id = ele.name ? ele.name : "customInput" + ind;
+                if (
+                  (ele.type.startsWith("uint") || ele.type.startsWith("int")
+                  ) && !(ele.type.endsWith("[]"))) {
+                  formInputs += `
+          <label for="${id}">${id} (${ele.type})</label><br/>
 
-            fileData = fileData + formInputs + `
-        <input type="submit" value="Submit"/>
-      </form>
-      <span>{${element.name}Value?.toLocaleString()}</span>
-    </>
+          <TextField
+            type="number" id="${id}" name="${id}" min="0" required
+            fullWidth
+            filled
+            style={{margin: "12px 0px", color: "#FFF"}}
+            color="secondary"
+            hiddenLabel
+          />
+                          `;
+                } else { // string, addreess, tuple, tuple[]
+                  formInputs += `
+          <label for="${id}">${id} (${ele.type})</label><br/>
+
+          <TextField
+            type="text" id="${id}" name="${id}" min="0" required
+            fullWidth
+            filled
+            style={{margin: "12px 0px", color: "#FFF"}}
+            color="secondary"
+            hiddenLabel
+          />
+                          `;
+                } 
+              })
+
+              fileData = fileData + formInputs + `
+          <Button variant="outlined" onClick={handleFormSubmit}>Submit</Button>
+        </form>
+
+        {${element.name}Value && 
+          <TextField
+            disabled
+            value={${element.name}Value?.toLocaleString()}
+            fullWidth
+            filled
+            style={{marginTop: "12px", color: "#FFF"}}
+            color="secondary"
+            hiddenLabel
+          />}
+
+      </CardContent>
+    </Card>
   );
 }
               
 export default ${componentName};`;
+readComponentList.push(componentName);
           } else {
             //for payable or non-payable functions with parameter value that generates transaction
             fileData = `//Creating custom component 
 import React, { useContext, useEffect, useState } from 'react';
 import { CONTRACTADDRESS, CONTRACTABI } from './contracts/contractData';
-            
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';   
+import Button from '@mui/material/Button';
+import Typography from '@mui/material/Typography';
+import TextField from '@mui/material/TextField';        
             
 const ${componentName} = (props) => {
       
@@ -223,41 +266,70 @@ const ${componentName} = (props) => {
   }
       
   return (
-    <>
-      <h4>${element.name}</h4>  
-      <form onSubmit={handleFormSubmit}>`;
-            let formInputs = "";
-            element.inputs.map((ele, ind) => {
-              // console.log(ele);
-              let id = ele.name ? ele.name : "customInput" + ind;
-              if (
-                (ele.type.startsWith("uint") || ele.type.startsWith("int")
-                ) && !(ele.type.endsWith("[]"))) {
-                formInputs += `
-        <label for="${id}">${id}: ${ele.type}</label><br/>
-        <input type="number" id="${id}" name="${id}" min="0" required/><br/>
-                      `;
-              } else {
-                formInputs += `
-        <label for="${id}">${id}: ${ele.type}</label><br/>
-        <input type="text" id="${id}" name="${id}" required/><br/>
-                      `;
-              } 
-            })
+    <Card style={{marginBottom: "20px"}} variant="outlined">
+      <CardContent>
+        <Typography variant="h6" gutterBottom>
+          ${element.name}
+        </Typography>
+        <form onSubmit={handleFormSubmit}>`;
+              let formInputs = "";
+              element.inputs.map((ele, ind) => {
+                // console.log(ele);
+                let id = ele.name ? ele.name : "customInput" + ind;
+                if (
+                  (ele.type.startsWith("uint") || ele.type.startsWith("int")
+                  ) && !(ele.type.endsWith("[]"))) {
+                  formInputs += `
+          <label for="${id}">${id} (${ele.type})</label><br/>
 
-            fileData = fileData + formInputs + `
-        <input type="submit" value="Submit"/>
-      </form>
-      <span style={{wordWrap:"break-word"}}>Transaction Details : {${element.name}Value?JSON.stringify(${element.name}Value):""}</span>
-  </>
+          <TextField
+            type="number" id="${id}" name="${id}" min="0" required
+            fullWidth
+            filled
+            style={{margin: "12px 0px", color: "#FFF"}}
+            color="secondary"
+            hiddenLabel
+          />`;
+                } else {
+                  formInputs += `
+          <label for="${id}">${id} (${ele.type})</label><br/>
+
+          <TextField
+            type="text" id="${id}" name="${id}" min="0" required
+            fullWidth
+            filled
+            style={{margin: "12px 0px", color: "#FFF"}}
+            color="secondary"
+            hiddenLabel
+          />`;
+                } 
+              })
+
+              fileData = fileData + formInputs + `
+          <Button variant="outlined" onClick={handleFormSubmit}>Submit</Button>
+        </form>
+
+        {${element.name}Value && 
+          <TextField
+            disabled
+            value={${element.name}Value?.toLocaleString()}
+            fullWidth
+            filled
+            style={{marginTop: "12px", color: "#FFF"}}
+            color="secondary"
+            hiddenLabel
+          />}
+      </CardContent>
+  </Card>
   );
 }
             
 export default ${componentName};`;
+writeComponentList.push(componentName);
           }
 
           /************** Create each function as react Component file **************/
-          fs.writeFileSync("./initial-code-for-npm-package/src/components/" + componentName + ".js", fileData);
+          fs.writeFileSync("./"+DIR_NAME+"/src/components/" + componentName + ".js", fileData);
 
           allComponentList.push(componentName);
         }
@@ -273,79 +345,39 @@ import ${ele} from './components/${ele}';`;
       <${ele} web3={walletData.web3} walletAddress={walletData.walletAddress}/>`;
       })
 
-      var AppJSFileContent = `
-import React, { useContext, useEffect, useState } from 'react';
-import './App.css';
-import Web3 from 'web3';
-`+ importComponents + `
+      var addReadComponentsInHTML = "";
+      readComponentList.map((ele, ind) => {
+        addReadComponentsInHTML += `
+      <${ele} web3={walletData.web3} walletAddress={walletData.walletAddress}/>`;
+      })
 
-function App() {
-
-  const [walletData, setWalletData] = useState({
-    walletAddress: "",
-    isConnected: false,
-    web3: null
-  });
-
-  async function connect() {
-    let web3;
-    //connect to web3
-    if (typeof window !== 'undefined' && typeof window.web3 !== 'undefined') {
-      //we are in the browser and metamask is running
-      //ETH mainnet 1
-      web3 = new Web3(window.web3.currentProvider);
-      let netId = parseInt(window.ethereum.chainId);
-      // console.log(netId);
-      // if (netId !== 1) {
-      //   alert('Please select ethereum mainnet network');
-      //   console.error('Please select ethereum mainnet network');
-      //   return;
-      // }
-
-      //set details
-      let accounts;
-      try {
-        accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-      } catch (error) {
-        if (error.code === 4001) {
-          console.error("Please allow metamask to connect");
-        }
-        return;
-        // console.log(error)
-      }
-      // console.log(accounts)
-      if (accounts.length < 1) {
-        console.error('Please unlock metamask wallet first!');
-        return;
-      }
-      // console.log(accounts[0]);
-      setWalletData({
-        walletAddress: accounts[0],
-        isConnected: true,
-        web3: web3
-      });
-    } else {
-      //on the browser or user is not running metamask
-      console.error("Metamask wallet not found! Please make sure wallet is installed and running!");
-    }
-  }
-
-  return (
-    <div className='App'>
-      <button variant="success" size="lg" className="connectWallet green-btn" onClick={connect}>
-        {walletData.isConnected ?
-          walletData.walletAddress.substr(0, 4) + "..." + walletData.walletAddress.substr(-4)
-          : "Connect Wallet"}
-      </button><br/>
-      `+ addComponentsInHTML + `
-    </div>
-  );
-}
-
-export default App;`;
+      var addWriteComponentsInHTML = "";
+      writeComponentList.map((ele, ind) => {
+        addWriteComponentsInHTML += `
+      <${ele} web3={walletData.web3} walletAddress={walletData.walletAddress}/>`;
+      })
 
       /************** Update App.js file **************/
-      fs.writeFileSync("./initial-code-for-npm-package/src/App.js", AppJSFileContent);
+      try {
+        let AppJsFile = fs.readFileSync("./"+DIR_NAME+"/src/App.js", 'utf8');
+        
+        // Add contract components
+        AppJsFile = AppJsFile.replace("// CONTRACT IMPORTS", importComponents);
+        
+        // Add contract components
+        //AppJsFile = AppJsFile.replace("CONTRACT_OVERVIEW", addComponentsInHTML);
+
+        // Add contract READ components
+        AppJsFile = AppJsFile.replace("CONTRACT_READ_FUNCTIONS", addReadComponentsInHTML);
+
+        // Add contract WRITE components
+        AppJsFile = AppJsFile.replace("CONTRACT_WRITE_FUNCTIONS", addWriteComponentsInHTML);
+        
+        fs.writeFileSync("./"+DIR_NAME+"/src/App.js", AppJsFile);
+      } catch (err) {
+        console.error(err);
+      }
+
       // console.log("App.js file updated with adding all newly created components");
       console.log("Project created sucessfully");
 

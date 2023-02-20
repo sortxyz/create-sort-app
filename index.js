@@ -55,19 +55,20 @@ https.get(api, function (response) {
     }
 
     if (jsonABI) {
+      const DIR_NAME = 'sort-app';
       // console.log(jsonABI);
 
       /************** Clone boilerplate code to current directory **************/
-      shell.exec('git clone https://github.com/KhemnarMayuresh/initial-code-for-npm-package')
+      shell.exec('git clone https://github.com/sortxyz/create-sort-app-template ' + DIR_NAME);
       console.log("Cloning the boilerplate code");
 
       /************** create component folder if not exists **************/
-      if (!fs.existsSync("./initial-code-for-npm-package/src/components")) {
-        fs.mkdirSync("./initial-code-for-npm-package/src/components");
+      if (!fs.existsSync("./"+DIR_NAME+"/src/components")) {
+        fs.mkdirSync("./"+DIR_NAME+"/src/components");
       }
 
-      if (!fs.existsSync("./initial-code-for-npm-package/src/components/contracts")) {
-        fs.mkdirSync("./initial-code-for-npm-package/src/components/contracts");
+      if (!fs.existsSync("./"+DIR_NAME+"/src/components/contracts")) {
+        fs.mkdirSync("./"+DIR_NAME+"/src/components/contracts");
       }
 
       var contractDataFileContent = `
@@ -75,7 +76,7 @@ https.get(api, function (response) {
       export const CONTRACTADDRESS = "${contractAddress}";
       export const CONTRACTABI = ${JSON.stringify(jsonABI)};
               `;
-              fs.writeFileSync("./initial-code-for-npm-package/src/components/contracts/contractData.js", contractDataFileContent);
+              fs.writeFileSync("./"+DIR_NAME+"/src/components/contracts/contractData.js", contractDataFileContent);
       
       var allComponentList = [];
       // console.log("Started creating react components for each function call");
@@ -345,7 +346,7 @@ function App() {
 export default App;`;
 
       /************** Update App.js file **************/
-      fs.writeFileSync("./initial-code-for-npm-package/src/App.js", AppJSFileContent);
+      fs.writeFileSync("./"+DIR_NAME+"/src/App.js", AppJSFileContent);
       // console.log("App.js file updated with adding all newly created components");
       console.log("Project created sucessfully");
 
