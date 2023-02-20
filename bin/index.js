@@ -56,11 +56,11 @@ https.get(api, function (response) {
 
     if (jsonABI) {
       const DIR_NAME = 'sort-app';
-      // console.log(jsonABI);
+      console.log("\n");
 
       /************** Clone boilerplate code to current directory **************/
       shell.exec('git clone https://github.com/sortxyz/create-sort-app-template ' + DIR_NAME);
-      console.log("Cloning the boilerplate code");
+      console.log("\n\x1b[32m✓\x1b[0m Cloning boilerplate project from Github");
 
       /************** create component folder if not exists **************/
       if (!fs.existsSync("./"+DIR_NAME+"/src/components")) {
@@ -334,7 +334,7 @@ writeComponentList.push(componentName);
           allComponentList.push(componentName);
         }
       })
-      console.log("Created all react components for each function call");
+      console.log("\x1b[32m✓\x1b[0m Built project based on contract ABI");
 
       /************** Update app.js file **************/
       var importComponents = "", addComponentsInHTML = "";
@@ -372,6 +372,9 @@ import ${ele} from './components/${ele}';`;
 
         // Add contract WRITE components
         AppJsFile = AppJsFile.replace("CONTRACT_WRITE_FUNCTIONS", addWriteComponentsInHTML);
+
+        // Add the contract address (3 times for 3 occurances)
+        AppJsFile = AppJsFile.replaceAll("CONTRACT_ADDRESS", contractAddress);
         
         fs.writeFileSync("./"+DIR_NAME+"/src/App.js", AppJsFile);
       } catch (err) {
@@ -379,7 +382,11 @@ import ${ele} from './components/${ele}';`;
       }
 
       // console.log("App.js file updated with adding all newly created components");
-      console.log("Project created sucessfully");
+      console.log("\x1b[32m✓\x1b[0m Project created sucessfully!");
+      console.log("\n🚀 To get started:");
+      console.log("> cd sort-app");
+      console.log("> npm i");
+      console.log("> npm start\n");
 
     } else {
       console.log("Error while loading contract abi. Please check contract address.");
