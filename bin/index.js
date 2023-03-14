@@ -109,8 +109,10 @@ import CardContent from '@mui/material/CardContent';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import TextField from '@mui/material/TextField';
-              
-const ${componentName} = (props) => {
+import { readContract } from '@wagmi/core';
+        
+export default function ${componentName}({}) {
+
         
   const [${element.name}Value, set${componentName}Value] = useState(null);//component Value
         
@@ -118,7 +120,6 @@ const ${componentName} = (props) => {
   const handleFormSubmit = async (event) => {
     event.preventDefault();
     try {
-      let myContract = new props.web3.eth.Contract(CONTRACTABI, CONTRACTADDRESS);
       `;
             let eventInputs = "";
             let functionCallParameter = "";
@@ -139,11 +140,17 @@ const ${componentName} = (props) => {
               }
             })
 
+            if (functionCallParameter === "" ) functionCallParameter = "[]";
+
             fileData = fileData + eventInputs + `
                   
-      let result = await myContract.methods.${element.name}(${functionCallParameter}).call({from: props.walletAddress});
-      // console.log("contract call result is "+result);
-      set${componentName}Value(result);
+      const data = await readContract({
+        address: CONTRACTADDRESS,
+        abi: CONTRACTABI,
+        functionName: '${element.name}',
+        args: ${functionCallParameter}
+      })
+      set${componentName}Value(data);
     } catch (e) {
       alert(e);
       console.log(e);
@@ -211,8 +218,7 @@ const ${componentName} = (props) => {
     </Card>
   );
 }
-              
-export default ${componentName};`;
+`;
 readComponentList.push(componentName);
           } else {
             //for payable or non-payable functions with parameter value that generates transaction

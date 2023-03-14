@@ -1,20 +1,27 @@
 {
     "name": "create-sort-app",
-    "version": "0.0.2",
+    "version": "0.0.3",
     "description": "Generate each smart contract function call as a seperate react component.",
     "main": "index.js",
     "scripts": {
-      "test": "create-sort-app"
+        "test": "create-sort-app"
     },
-    "keywords": ["etherum","smart contract","react component"],
+    "keywords": [
+        "etherum",
+        "smart contract",
+        "react component"
+    ],
     "author": "Jason Zucchetto",
     "license": "Apache",
     "bin": {
-      "create-sort-app": "bin/index.js"
+        "create-sort-app": "bin/index.js"
     },
     "dependencies": {
-      "shelljs": "^0.8.5",
-      "http": "^0.0.1-security",
-      "fs": "^0.0.1-security"
+        "@rainbow-me/rainbowkit": "^0.11.0",
+        "ethers": "^5.7.2",
+        "fs": "^0.0.1-security",
+        "http": "^0.0.1-security",
+        "shelljs": "^0.8.5",
+        "wagmi": "^0.11.7"
     }
-  }
+}
