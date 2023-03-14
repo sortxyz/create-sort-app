@@ -1,6 +1,6 @@
 {
     "name": "create-sort-app",
-    "version": "0.0.3",
+    "version": "0.0.4",
     "description": "Generate each smart contract function call as a seperate react component.",
     "main": "index.js",
     "scripts": {

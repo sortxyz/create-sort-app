@@ -63,12 +63,12 @@ https.get(api, function (response) {
       console.log("\n\x1b[32m✓\x1b[0m Cloning boilerplate project from Github");
 
       /************** create component folder if not exists **************/
-      if (!fs.existsSync("./"+DIR_NAME+"/src/components")) {
-        fs.mkdirSync("./"+DIR_NAME+"/src/components");
+      if (!fs.existsSync("./"+DIR_NAME+"/src/components/Contract/WriteFunctions")) {
+        fs.mkdirSync("./"+DIR_NAME+"/src/components/Contract/WriteFunctions");
       }
 
-      if (!fs.existsSync("./"+DIR_NAME+"/src/components/contracts")) {
-        fs.mkdirSync("./"+DIR_NAME+"/src/components/contracts");
+      if (!fs.existsSync("./"+DIR_NAME+"/src/components/Contract/ReadFunctions")) {
+        fs.mkdirSync("./"+DIR_NAME+"/src/components/Contract/ReadFunctions");
       }
 
       var contractDataFileContent = `
@@ -76,7 +76,7 @@ https.get(api, function (response) {
       export const CONTRACTADDRESS = "${contractAddress}";
       export const CONTRACTABI = ${JSON.stringify(jsonABI)};
               `;
-              fs.writeFileSync("./"+DIR_NAME+"/src/components/contracts/contractData.js", contractDataFileContent);
+              fs.writeFileSync("./"+DIR_NAME+"/src/components/Contract/Constants.js", contractDataFileContent);
       
       var allComponentList = [];
       var readComponentList = [];
@@ -103,7 +103,7 @@ https.get(api, function (response) {
             // for view or pure methods that return value and will not generate transaction  
             fileData = `//Creating custom component 
 import React, { useContext, useEffect, useState } from 'react';
-import { CONTRACTADDRESS, CONTRACTABI } from './contracts/contractData';
+import { CONTRACTADDRESS, CONTRACTABI } from '../Constants';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Button from '@mui/material/Button';
@@ -219,12 +219,16 @@ export default function ${componentName}({}) {
   );
 }
 `;
+
+/************** Create each function as react Component file **************/
+fs.writeFileSync("./"+DIR_NAME+"/src/components/Contract/ReadFunctions/" + componentName + ".js", fileData);
+
 readComponentList.push(componentName);
           } else {
             //for payable or non-payable functions with parameter value that generates transaction
             fileData = `//Creating custom component 
 import React, { useContext, useEffect, useState } from 'react';
-import { CONTRACTADDRESS, CONTRACTABI } from './contracts/contractData';
+import { CONTRACTADDRESS, CONTRACTABI } from '../Constants';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';   
 import Button from '@mui/material/Button';
@@ -332,11 +336,13 @@ const ${componentName} = (props) => {
             
 export default ${componentName};`;
 writeComponentList.push(componentName);
+
+/************** Create each function as react Component file **************/
+fs.writeFileSync("./"+DIR_NAME+"/src/components/Contract/WriteFunctions/" + componentName + ".js", fileData);
+
           }
 
-          /************** Create each function as react Component file **************/
-          fs.writeFileSync("./"+DIR_NAME+"/src/components/" + componentName + ".js", fileData);
-
+          
           allComponentList.push(componentName);
         }
       })
@@ -344,23 +350,36 @@ writeComponentList.push(componentName);
 
       /************** Update app.js file **************/
       var importComponents = "", addComponentsInHTML = "";
+
+      /*
       allComponentList.map((ele, ind) => {
         importComponents += `
 import ${ele} from './components/${ele}';`;
         addComponentsInHTML += `
       <${ele} web3={walletData.web3} walletAddress={walletData.walletAddress}/>`;
       })
+      */
 
       var addReadComponentsInHTML = "";
       readComponentList.map((ele, ind) => {
         addReadComponentsInHTML += `
-      <${ele} web3={walletData.web3} walletAddress={walletData.walletAddress}/>`;
+      <${ele} />`;
+
+        importComponents += `
+import ${ele} from './components/Contract/ReadFunctions/${ele}';`;
+        addComponentsInHTML += `
+      <${ele} />`;
       })
 
       var addWriteComponentsInHTML = "";
       writeComponentList.map((ele, ind) => {
         addWriteComponentsInHTML += `
-      <${ele} web3={walletData.web3} walletAddress={walletData.walletAddress}/>`;
+      <${ele} />`;
+
+        importComponents += `
+import ${ele} from './components/Contract/WriteFunctions/${ele}';`;
+        addComponentsInHTML += `
+        <${ele} />`;
       })
 
       /************** Update App.js file **************/
@@ -388,7 +407,12 @@ import ${ele} from './components/${ele}';`;
       }
 
       // console.log("App.js file updated with adding all newly created components");
+      
       console.log("\x1b[32m✓\x1b[0m Project created sucessfully!");
+
+      console.log("\n😻 Feedback and issues: https://github.com/sortxyz/create-sort-app");
+      console.log("🤖 Docs: https://docs.sort.xyz");
+
       console.log("\n🚀 To get started:");
       console.log("> cd sort-app");
       console.log("> npm i");
