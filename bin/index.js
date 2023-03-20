@@ -99,6 +99,7 @@ https.get(api, function (response) {
           }
 
           var fileData = "";
+          var storyFileData = "";
           if (element.stateMutability == "view" || element.stateMutability == "pure") {
             // for view or pure methods that return value and will not generate transaction  
             fileData = `//Creating custom component 
@@ -220,8 +221,25 @@ export default function ${componentName}({}) {
 }
 `;
 
+storyFileData = `
+import React from 'react';
+import ${componentName} from './${componentName}';
+
+export default {
+  component: ${componentName},
+  title: "Read Functions/${componentName}"
+};
+
+const Template = args => <${componentName} {...args} />;
+
+export const Default = Template.bind({});
+Default.args = {};
+`;
+
+
 /************** Create each function as react Component file **************/
 fs.writeFileSync("./"+DIR_NAME+"/src/components/Contract/ReadFunctions/" + componentName + ".js", fileData);
+fs.writeFileSync("./"+DIR_NAME+"/src/components/Contract/ReadFunctions/" + componentName + ".stories.js", storyFileData);
 
 readComponentList.push(componentName);
           } else {
@@ -235,7 +253,7 @@ import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import TextField from '@mui/material/TextField';        
             
-const ${componentName} = (props) => {
+export default function ${componentName}({}) {
       
   const [${element.name}Value, set${componentName}Value] = useState(null);//component Value
       
@@ -243,7 +261,7 @@ const ${componentName} = (props) => {
   const handleFormSubmit = async (event) => {
     event.preventDefault();
     try {
-      let myContract = new props.web3.eth.Contract(CONTRACTABI, CONTRACTADDRESS);
+      //let myContract = new props.web3.eth.Contract(CONTRACTABI, CONTRACTADDRESS);
       `;
             let eventInputs = "";
             let functionCallParameter = "";
@@ -251,11 +269,11 @@ const ${componentName} = (props) => {
               let id = ele.name ? ele.name : "customInput" + ind;
               if(ele.type.startsWith("tuple") || ele.type.endsWith("[]")){
                 eventInputs += `
-      var ${id} = JSON.parse(event.target.${id}.value);
+      //var ${id} = JSON.parse(event.target.${id}.value);
                               `;          
               } else{
                 eventInputs += `
-      var ${id} = event.target.${id}.value;
+      //var ${id} = event.target.${id}.value;
                               `;          
               }
               functionCallParameter += `${id}`;
@@ -266,9 +284,9 @@ const ${componentName} = (props) => {
 
             fileData = fileData + eventInputs + `
                 
-      let transaction = await myContract.methods.${element.name}(${functionCallParameter}).send({from:props.walletAddress});
+      //let transaction = await myContract.methods.${element.name}(${functionCallParameter}).send({from:props.walletAddress});
       // console.log("contract call transaction is "+transaction);
-      set${componentName}Value(transaction.transactionHash);
+      //set${componentName}Value(transaction.transactionHash);
     } catch (e) {
       alert(e);
       console.log(e);
@@ -333,12 +351,29 @@ const ${componentName} = (props) => {
   </Card>
   );
 }
-            
-export default ${componentName};`;
+`;
+
+// Create component story
+storyFileData = `
+import React from 'react';
+import ${componentName} from './${componentName}';
+
+export default {
+  component: ${componentName},
+  title: "Write Functions/${componentName}"
+};
+
+const Template = args => <${componentName} {...args} />;
+
+export const Default = Template.bind({});
+Default.args = {};
+`;
+
 writeComponentList.push(componentName);
 
 /************** Create each function as react Component file **************/
 fs.writeFileSync("./"+DIR_NAME+"/src/components/Contract/WriteFunctions/" + componentName + ".js", fileData);
+fs.writeFileSync("./"+DIR_NAME+"/src/components/Contract/WriteFunctions/" + componentName + ".stories.js", storyFileData);
 
           }
 
